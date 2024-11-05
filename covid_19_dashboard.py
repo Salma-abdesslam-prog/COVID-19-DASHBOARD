@@ -142,5 +142,3 @@ def update_graphs(selected_country, start_date, end_date):
 # Run the app
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-pip freeze > requirements.txt
