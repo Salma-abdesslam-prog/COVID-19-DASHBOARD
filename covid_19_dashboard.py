@@ -1,5 +1,3 @@
-!pip install pandas numpy dash dash-bootstrap-components plotly
-
 # Import necessary libraries
 import pandas as pd
 import numpy as np
@@ -20,13 +18,15 @@ data = pd.read_csv(url)
 data = data.drop(['Province/State', 'Lat', 'Long'], axis=1).groupby('Country/Region').sum().T
 
 # Convert date strings to datetime objects
-data.index = pd.to_datetime(data.index)
+data.index = pd.to_datetime(data.index, errors='coerce')
+data = data.dropna()  # Drop any rows with invalid dates
 
 # Create new feature: daily new cases
 daily_cases = data.diff().fillna(0)
 
 # Set up Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server  # Required for deployment
 
 # Layout for the dashboard
 app.layout = dbc.Container([
@@ -84,6 +84,9 @@ app.layout = dbc.Container([
      Input('date-picker-range', 'end_date')]
 )
 def update_graphs(selected_country, start_date, end_date):
+    if not selected_country or not start_date or not end_date:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
     filtered_data = data.loc[start_date:end_date]
     filtered_daily = daily_cases.loc[start_date:end_date]
 
